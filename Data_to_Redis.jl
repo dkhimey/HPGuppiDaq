@@ -1,31 +1,27 @@
 using HashpipeCalculations, Redis
 ENV["HASHPIPE_KEYFILE"]="/home/davidm"
-# ----- INPUT
+
 inst, nbuff, nblock = 0, 2, 0
-# OBSNCHAN, 2 (or NPOL?), ???
-nc, np, nt = 64, 2, 512*1024
-# try ARGS[1], ARGS[2], ARGS[3]
-# catch e
-#     # read status buffer
-# end
 
-# ----- DATA
-# attach to data buffer
-data = track_databuffer()
+# ----- INPUT
+# nc, np, nt = 64, 2, 512*1024
+try nc, np, nt = Int(ARGS[1]), Int(ARGS[2]), Int(ARGS[3])
+catch e
+    nc = hget(conn, "srt://blc00/0/status", "OBSSCHAN")
+    np = 2
+    nt = none
+end
 
-# calculations
-avgpwr = compute_pwr(data, nt)
-fft = hashpipe_fft(data, np, nt, nc)
-
-# ----- data to abstract string
-abspwr = unsafe_string(Ptr{UInt8}(pointer(avgpwr)), sizeof(avgpwr))
-absfft = unsafe_string(Ptr{UInt8}(pointer(fft)), sizeof(fft))
-
-# ------ Redis
+data = track_databuffer((inst, nbuff, nblock), (nc, np, nt))
 conn = RedisConnection(host="blh0")
-# srt://blc00/0/spectra
-hset(conn, "srt://blc00/0/spectra", "avgpwr", absstr)
-hset(conn, "srt://blc00/0/spectra", "fft", absfft)
+
+avgpwr = compute_pwr(data, nt)
+abspwr = unsafe_string(Ptr{UInt8}(pointer(avgpwr)), sizeof(avgpwr))
+hset(conn, "srt://blc00/0/spectra", "avgpwr", abspwr)
+
+# fft = hashpipe_fft(data, np, nt, nc)
+# absfft = unsafe_string(Ptr{UInt8}(pointer(fft)), sizeof(fft))
+# hset(conn, "srt://blc00/0/spectra", "fft", absfft)
 
 
 

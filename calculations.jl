@@ -1,8 +1,8 @@
 module HashpipeCalculations
     using Hashpipe, FFTW
 
-    function track_databuffer((inst, nbuff, nblock) = (0, 2, 0), 
-                            (np, nt, nc) = (2, 512*1024, 64))
+    function track_databuffer((inst, nbuff, nblock), 
+                            (np, nt, nc))
         ENV["HASHPIPE_KEYFILE"]="/home/davidm"
         # attach to data buffer
         pdb = Hashpipe.hashpipe_databuf_attach(inst, nbuff)
