@@ -1,6 +1,6 @@
 include("calculations.jl")
 include("StatusBuff.jl")
-using .HashpipeCalculations, .StatusBuff, Hashpipe, FFTW, CircularArrays, Plots
+using .HashpipeCalculations, .StatusBuff, Hashpipe, FFTW, CircularArrayBuffers, Plots
 
 # track databuffer
 inst, nbuff = 0, 2
