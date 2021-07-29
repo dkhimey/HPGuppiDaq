@@ -52,6 +52,6 @@ module HashpipeCalculations
 
     function remove_DCspike(pwr_array)
         n = size(pwr_array)[2]
-        pwr_array[:,n÷2 + 1] = (@view pwr_array[:,n÷2] + pwr_array[:,n÷2 + 2])/2
+        pwr_array[:,n÷2 + 1] = ((@view pwr_array[:,n÷2]) + (@view pwr_array[:,n÷2 + 2]))/2
     end
 end

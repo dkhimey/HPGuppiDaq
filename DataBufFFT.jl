@@ -1,25 +1,24 @@
 include("calculations.jl")
-using .HashpipeCalculations, FFTW
+using .HashpipeCalculations, Hashpipe, FFTW
 
 # track databuffer
 inst, nbuff = 0, 2
 np, nt, nc = 2, 512*1024, 64
+ENV["HASHPIPE_KEYFILE"]="/home/davidm"
+# attach to data buffer
+pdb = Hashpipe.databuf_attach(inst, nbuff)
 
-data = Array{pointer(Complex{Int8})}(undef,128, np, nt, nc)
+blockdata = []
 
 nblock = 0
-while nblock < 25
+while nblock < 3
     println(nblock)
-    # not a pointer :/ -- need a fix
-    data[nblock+1, :, :, :] = HashpipeCalculations.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
+    pb = Hashpipe.databuf_data(pdb, nblock)
+    pz = Ptr{Complex{Int8}}(pb+2560*80)
+    push!(blockdata, unsafe_wrap(Array, pz, (np, nt, nc)))
     nblock+=1
 end
 
-
-q = Queue{}()
-
-chan = 7
-n = 2^16
-pwr = HashpipeCalculations.hashpipe_fft(data, n, chan)
-dequeue!(q)
-enqueue!(q, pwr)
+# chan = 7
+# n = 2^16
+# pwr = HashpipeCalculations.hashpipe_fft(data, n, chan)
