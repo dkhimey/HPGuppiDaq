@@ -1,6 +1,5 @@
 module HashpipeCalculations
     using Hashpipe, FFTW
-
     function track_databuffer((inst, nbuff, nblock), 
                             (np, nt, nc))
         ENV["HASHPIPE_KEYFILE"]="/home/davidm"
@@ -36,11 +35,22 @@ module HashpipeCalculations
         return compute_mag(raw_data[:, idx, :])
     end
 
-    function hashpipe_fft(raw_data, np, nt, nc)
-        transformed = fft(reshape(raw_data, (np, 128, Int(nt/128), nc)), 2)
-        shifted = fftshift(transformed, 2)
-        total_pwr = compute_pwr(shifted, 1, false, 3)
-        return reshape(total_pwr, (np,128*nc))
+    function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, n, chan,
+                          np=2, nt=512*1024, nc=64, integrated=true)
+        # single coarse channel FFT
+        reshaped = reshape(raw_data, (np, n, nt÷n, nc))[:, :, :, chan]
+        transformed = fft(reshaped, 2)
+        shifted = fftshift(transformed, 2) #(2, n, nt/n, nchans)
+        if integrated
+            total_pwr = compute_pwr(shifted, 1, false, 3) #(2, n, 1)
+            return reshape(total_pwr, (np,length(chan)*n))
+        else
+            return shifted
+        end
     end
 
+    function remove_DCspike(pwr_array)
+        n = size(pwr_array)[2]
+        pwr_array[:,n÷2 + 1] = (pwr_array[:,n÷2] + pwr_array[:,n÷2 + 2])/2
+    end
 end

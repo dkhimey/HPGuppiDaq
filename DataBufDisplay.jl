@@ -1,13 +1,13 @@
+module Display
 using .HashpipeCalculations, Plots, Statistics
 
-module Display
-    data = track_databuffer()
-    (inst, nbuff, nblock) = (0, 2, 0)
-    (np, nt, nc) = (2, 512*1024, 64)
+    inst, nbuff, nblock = 0, 2, 0
+    np, nt, nc = 2, 512*1024, 64
+    data = HashpipeCalculations.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
 
     # snapshot_xxx functions return plots
-    function snapshot_power(data = data)
-        avg_pwr = compute_pwr(data, nt)
+    function snapshot_power()
+        avg_pwr = HashpipeCalculations.compute_pwr(data, nt)
 
         l1 = @layout [a ; b]
         pol1 = avg_pwr[1,1,:]
@@ -28,10 +28,10 @@ module Display
         return plot(p, h, layout = l2)
     end
 
-    function snapshot_misc(data = data)
-        avg_pwr = compute_pwr(data, nt)
-        interval_pwr = compute_intvlpwr(data, 1, 1000)
-        single_pwr = compute_singlepwr(data, 1)
+    function snapshot_misc()
+        avg_pwr = HashpipeCalculations.compute_pwr(data, nt)
+        interval_pwr = HashpipeCalculations.compute_intvlpwr(data, 1, 1000)
+        single_pwr = HashpipeCalculations.compute_singlepwr(data, 1)
 
         l = @layout [a;b;c]
         t1 = plot(avg_pwr[1,1,:], title = "1st Polarization",
@@ -51,9 +51,9 @@ module Display
         return plot(p1, p2, layout=l)
     end
 
-    function snapshot_fft(data = data)
-        avg_pwr = compute_pwr(data, nt)
-        fine_pwr = hashpipe_fft(data, np, nt, nc)
+    function snapshot_fft()
+        avg_pwr = HashpipeCalculations.compute_pwr(data, nt)
+        fine_pwr = HashpipeCalculations.hashpipe_fft(data, 128, np, nt, nc, 8)
 
         l1 = @layout [a; b]
         pol1 = avg_pwr[1,1,:]
