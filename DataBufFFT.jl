@@ -1,11 +1,12 @@
 include("HashpipeCalculations.jl")
 include("StatusBuff.jl")
+include("params.jl")
 using .HashpipeCalculations, .StatusBuff, Hashpipe, FFTW, CircularArrayBuffers, Plots
 
 # databuffer properties
-inst, nbuff = 0, 2
-np, nt, nc = 2, 512*1024, 64
-nblocks = 24
+inst, nbuff = params.inst, params.nbuff
+np, nt, nc = params.np, params.nt, params.nc
+nblocks = params.nblocks
 
 ENV["HASHPIPE_KEYFILE"]="/home/davidm"
 # attach to data buffer

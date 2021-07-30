@@ -1,8 +1,10 @@
+include("HashpipeCalculations.jl")
+include("params.jl")
 using .HashpipeCalculations, Redis
 ENV["HASHPIPE_KEYFILE"]="/home/davidm"
 
-inst, nbuff, nblock = 0, 2, 0
-np, nt, nc = 2, 512*1024, 64
+inst, nbuff = params.inst, params.nbuff
+np, nt, nc = params.np, params.nt, params.nc
 
 # track databuffer
 data = HashpipeCalculations.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
