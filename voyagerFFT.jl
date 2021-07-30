@@ -1,4 +1,4 @@
-include("calculations.jl")
+include("HashpipeCalculations.jl")
 using .HashpipeCalculations, Blio, Plots, FFTW, Statistics
 
 np, nt, nc = (2, 524288, 64)

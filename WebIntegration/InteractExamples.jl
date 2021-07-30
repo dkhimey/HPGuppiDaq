@@ -39,6 +39,7 @@ const UI = Ref{Any}()
 function ui()
     if !isassigned(UI)
         refreshbutton = button("Refresh")
+        throttle(10, refreshbutton)
 
         myplot = Observable{Any}(plot(rand(10), ylims=(0,1)))
         map!(_->plot(rand(10), ylims=(0,1)), myplot, refreshbutton)
@@ -62,3 +63,5 @@ function serve(port=8000)
 end
 
 end # module
+
+InteractExamples.serve(8011)

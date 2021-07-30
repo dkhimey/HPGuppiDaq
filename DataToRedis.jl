@@ -4,14 +4,6 @@ ENV["HASHPIPE_KEYFILE"]="/home/davidm"
 inst, nbuff, nblock = 0, 2, 0
 np, nt, nc = 2, 512*1024, 64
 
-# ----- INPUT
-# try nc, np, nt = Int(ARGS[1]), Int(ARGS[2]), Int(ARGS[3])
-# catch e
-#     nc = hget(conn, "srt://blc00/0/status", "OBSSCHAN")
-#     np = 2
-#     nt = none
-# end
-
 # track databuffer
 data = HashpipeCalculations.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
 # connect to redis
