@@ -19,7 +19,7 @@ function exit(x)
     println("Connection Closed")
 end
 
-sub = open_subscription(conn, exit)
+sub = open_subscription(conn)
 
 try
     subscribe(sub, "chan-srt://blc00/0/spectra", f)

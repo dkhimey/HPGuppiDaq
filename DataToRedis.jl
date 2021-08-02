@@ -5,11 +5,13 @@ ENV["HASHPIPE_KEYFILE"]="/home/davidm"
 
 inst, nbuff = params.inst, params.nbuff
 np, nt, nc = params.np, params.nt, params.nc
+nblock = 0
 
 # track databuffer
 data = HashpipeCalculations.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
 # connect to redis
 conn = RedisConnection(host="blh0")
+
 
 while true
     # compute power
