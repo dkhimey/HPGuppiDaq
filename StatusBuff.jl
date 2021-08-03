@@ -5,6 +5,9 @@ module StatusBuff
     # Hashpipe.status_attach(0, Ref(st))
 
     function getStatus(st, field, type=Int)
+        st_array = unsafe_wrap(Array, st.p_buf,
+                    (Hashpipe.STATUS_RECORD_SIZE, Hashpipe.STATUS_TOTAL_SIZE÷Hashpipe.STATUS_RECORD_SIZE))
+        stsv = StringView.(eachcol(st_array))
         Hashpipe.status_buf_lock_unlock(Ref(st)) do
             parse(type, @view stsv[findfirst(startswith(field), stsv)][10:end])
         end
