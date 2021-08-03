@@ -16,12 +16,12 @@ module StatusBuff
         end
     end
 
-    function getnblkin(st, inst=0)
+    function getnblkin(st, inst=0, piperblk = 16384, nblocks = 24)
         # attempt to access NULBLKIN field
         try return getStatus(st, "NULBLKIN", inst)
         catch
             # if NULBLKIN field does not exist, calculate using PKTIDX
-            return getStatus(st, "PKTIDX", inst) ÷ 16384 % 24
+            return getStatus(st, "PKTIDX", inst) ÷ piperblk % nblocks
         end
     end
 
