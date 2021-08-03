@@ -4,12 +4,13 @@ include("StatusBuff.jl")
 using .HashpipeUtils, .StatusBuff, Hashpipe, FFTW, CircularArrayBuffers, Plots
 
 # loop: read status buffer, FFT of nblkin-1, add to circular array, display
-function FFTread(datablocks, circarr, chan, st, inst = 0, nf = 2^16, t = 1)
+function FFTread(datablocks, circarr, chan, st, inst = 0,
+                 nf = 2^16, nblocks = 24,t = 1)
     while true
         blk = StatusBuff.getnblkin(st, inst)
         # *****improve this******
         if blk== 0
-            blk = 24
+            blk = nblocks
         end
         # ***********************
 
