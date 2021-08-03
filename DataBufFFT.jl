@@ -3,7 +3,7 @@ include("StatusBuff.jl")
 using .HashpipeUtils, .StatusBuff, Hashpipe, FFTW, CircularArrayBuffers, Plots
 
 # attach to data buffer & get data in blocks
-datablocks = HashpipeUtils.track_databuffer((0, 2, 24), (2, 512*1024, 64))
+blks = HashpipeUtils.track_databuffer((0, 2, 24), (2, 512*1024, 64))
 
 # attach to status buffer
 stsv = StatusBuff.track_statusbuff(0)
@@ -13,7 +13,7 @@ stsv = StatusBuff.track_statusbuff(0)
 spectra = CircularArrayBuffer{Array{Float32, 2}}(5)
 
 # loop: read status buffer, FFT of nblkin-1, add to circular array, display
-function FFTread(circarr = spectra , nf = 2^16, chan = 7, t = .1)
+function FFTread(datablocks, circarr = spectra , nf = 2^16, chan = 7, t = .1)
     while true
         blk = StatusBuff.getnblkin(stsv)
         # *****improve this******
