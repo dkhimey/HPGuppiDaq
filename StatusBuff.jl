@@ -1,5 +1,5 @@
 module StatusBuff
-    using Hashpipe
+    using Hashpipe, StringViews
 
     # st = Hashpipe.status_t(0,0,0,0)
     # Hashpipe.status_attach(0, Ref(st))
