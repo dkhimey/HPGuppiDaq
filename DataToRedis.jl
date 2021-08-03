@@ -1,17 +1,14 @@
 include("HashpipeCalculations.jl")
-include("params.jl")
 using .HashpipeCalculations, Redis
-ENV["HASHPIPE_KEYFILE"]="/home/davidm"
 
-inst, nbuff = params.inst, params.nbuff
-np, nt, nc = params.np, params.nt, params.nc
+inst, nbuff = 0, 2
+np, nt, nc = 2, 512*1024, 64
 nblock = 0
 
 # track databuffer
 data = HashpipeCalculations.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
 # connect to redis
-conn = RedisConnection(host="blh0")
-
+conn = RedisConnection(host="redishost")
 
 while true
     # compute power

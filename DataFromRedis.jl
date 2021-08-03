@@ -1,7 +1,7 @@
 include("RedisDisplay.jl")
 using .RedisDisplay, Redis
 
-conn = RedisConnection(host="blh0")
+conn = RedisConnection(host="redishost")
 # srt://blc00/0/spectra
 
 function f(x)
@@ -22,7 +22,7 @@ try
     # subsrcribe to channel where messages are being sent
     subscribe(sub, "chan-srt://blc00/0/spectra", f)
 catch e
-    # attempts are handling keyboard interruptions, doesnt work yet
+    # attempt at handling keyboard interruptions, doesnt work yet
     if isa(e, InterruptException)
         Redis.unsubscribe(sub, "chan-srt://blc00/0/spectra")
         println("Connection Closed.")
