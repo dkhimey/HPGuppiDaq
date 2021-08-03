@@ -1,4 +1,4 @@
-include("HashpipeUtils.jl")
+include("../HashpipeUtils.jl")
 using .HashpipeUtils, Blio, Plots, FFTW, Statistics
 
 np, nt, nc = (2, 524288, 64) #(polarizations, time samples, coarse channels)
