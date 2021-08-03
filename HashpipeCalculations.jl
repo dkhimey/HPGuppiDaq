@@ -1,16 +1,23 @@
 module HashpipeCalculations
     using Hashpipe, FFTW
-    function track_databuffer((inst, nbuff, nblock), 
-                            (np, nt, nc))
-        ENV["HASHPIPE_KEYFILE"]="/home/davidm"
+
+    function track_databuffer((inst, nbuff, nblocks), 
+                              (np, nt, nc))
         # attach to data buffer
-        pdb = Hashpipe.hashpipe_databuf_attach(inst, nbuff)
-        # pointer to data block
-        pb = Hashpipe.hashpipe_databuf_data(pdb, nblock)
-        # cast data to complex integers; offset by 2560*80 for header
-        pz = Ptr{Complex{Int8}}(pb+2560*80)
-        # data
-        return unsafe_wrap(Array, pz, (np, nt, nc))
+        pdb = Hashpipe.databuf_attach(inst, nbuff)
+        # initialize vector that will hold all datablocks
+        datablocks = []
+        nblock = 0
+        while nblock < nblocks
+            # pointer to data block
+            pb = Hashpipe.databuf_data(pdb, nblock)
+            # cast data to complex integers; offset by 2560*80 for header
+            pz = Ptr{Complex{Int8}}(pb+2560*80)
+            # add to vector
+            push!(datablocks, unsafe_wrap(Array, pz, (np, nt, nc)))
+            nblock+=1
+        end
+        return datablocks
     end
 
     function compute_mag(raw_data)
@@ -37,8 +44,6 @@ module HashpipeCalculations
 
     function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, n, chan,
                           np=2, nt=512*1024, nc=64, integrated=true)
-        # single coarse channel FFT
-        # @allocated
         reshaped = @view reshape(raw_data, (np, n, nt÷n, nc))[:, :, :, chan]
         transformed = fft(reshaped, 2)
         shifted = fftshift(transformed, 2) #(2, n, nt/n, nchans)
