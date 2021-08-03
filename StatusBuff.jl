@@ -1,24 +1,26 @@
 module StatusBuff
     using Hashpipe, StringViews
 
-    # st = Hashpipe.status_t(0,0,0,0)
-    # Hashpipe.status_attach(0, Ref(st))
-
-    function getStatus(st, field, type=Int)
+    function track_statusbuff(inst)
+        st = Hashpipe.status_t(0,0,0,0)
+        Hashpipe.status_attach(inst, Ref(st))
         st_array = unsafe_wrap(Array, st.p_buf,
                     (Hashpipe.STATUS_RECORD_SIZE, Hashpipe.STATUS_TOTAL_SIZE÷Hashpipe.STATUS_RECORD_SIZE))
-        stsv = StringView.(eachcol(st_array))
+        return StringView.(eachcol(st_array))
+    end
+
+    function getStatus(stsv, field, type=Int)
         Hashpipe.status_buf_lock_unlock(Ref(st)) do
-            parse(type, @view stsv[findfirst(startswith(field), stsv)][10:end])
+            return parse(type, @view stsv[findfirst(startswith(field), stsv)][10:end])
         end
     end
 
-    function getnblkin(st)
+    function getnblkin(stsv)
         # attempt to access NULBLKIN field
-        try return getStatus(st, "NULBLKIN")
+        try return getStatus(stsv, "NULBLKIN")
         catch
             # if NULBLKIN field does not exist, calculate using PKTIDX
-            return getStatus(st, "PKTIDX") ÷ 16384 % 24
+            return getStatus(stsv, "PKTIDX") ÷ 16384 % 24
         end
     end
 
