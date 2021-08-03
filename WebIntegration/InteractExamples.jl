@@ -32,28 +32,35 @@ function maketable(conn, instance="blc00/0")
 end
 
 maketablehtml(conn) = maketable(conn) |> HTML
-#maketablenode(conn) = node(:div, maketablehtml(conn))
-
+# connect to redis
+conn = RedisConnection(host="blh0")
+sub = open_subscription(conn)
 const UI = Ref{Any}()
+
+observable = Observable(0)
+function f()
+    observable += 1
+end
 
 function ui()
     if !isassigned(UI)
+        subscribe(sub, "chan-srt://blc00/0/spectra", f)
         refreshbutton = button("Refresh")
-        throttle(10, refreshbutton)
+        # throttle(10, refreshbutton) # doesn't work
 
         myplot = Observable{Any}(plot(rand(10), ylims=(0,1)))
-        map!(_->plot(rand(10), ylims=(0,1)), myplot, refreshbutton)
+        map!(_->plot(rand(10), ylims=(0,1)), myplot, observable)
 
         ## This works
         #tablenode = Observable{Any}(maketablenode(redis()))
         #map!(_->maketablenode(redis()), tablenode, refreshbutton)
 
         # This also works and doesn't create a new node each update
-        tablehtml = Observable{HTML{String}}(maketablehtml(redis()))
-        tablenode = Observable{Any}(node(:div, tablehtml))
-        map!(_->maketablehtml(redis()), tablehtml, refreshbutton)
+        # tablehtml = Observable{HTML{String}}(maketablehtml(redis()))
+        # tablenode = Observable{Any}(node(:div, tablehtml))
+        # map!(_->maketablehtml(redis()), tablehtml, refreshbutton)
 
-        UI[] = dom"div"(refreshbutton, myplot, tablenode)
+        UI[] = dom"div"(refreshbutton, myplot)
     end
     UI[]
 end
@@ -64,4 +71,4 @@ end
 
 end # module
 
-InteractExamples.serve(8011)
+InteractExamples.serve(8021)

@@ -1,10 +1,10 @@
-include("HashpipeCalculations.jl")
-using .HashpipeCalculations, Redis
+include("HashpipeUtils.jl")
+using .HashpipeUtils, Redis
 
 # inst, nbuff = 0, 2
 # np, nt, nc = 2, 512*1024, 64
 # nblocks = 24
-# blks = HashpipeCalculations.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
+# blks = HashpipeUtils.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
 
 function pushRedis(datablocks, t = 1)
     # connect to redis
@@ -12,7 +12,7 @@ function pushRedis(datablocks, t = 1)
     while true
         println("pushing.....")
         # compute power
-        power = HashpipeCalculations.compute_pwr.(datablocks) #this takes forever
+        power = HashpipeUtils.compute_pwr.(datablocks) #this takes forever
         # convert power array to abstract string
         abspwr = unsafe_string(Ptr{UInt8}(pointer(power)), sizeof(power))
         # add abstract string to redis

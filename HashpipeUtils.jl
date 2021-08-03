@@ -1,4 +1,4 @@
-module HashpipeCalculations
+module HashpipeUtils
     using Hashpipe, FFTW
 
     function track_databuffer((inst, nbuff, nblocks), 
@@ -24,9 +24,10 @@ module HashpipeCalculations
         return abs2.(Complex{Float32}.(raw_data))
     end
 
-    function compute_pwr(raw_data, nt, avg=true, dim =2)
+    function compute_pwr(raw_data, avg=true, dim =2)
         pwr = sum(compute_mag(raw_data), dims=dim)
         if avg
+            nt = size(raw_data)[dim]
             return pwr/nt
         else 
             return pwr

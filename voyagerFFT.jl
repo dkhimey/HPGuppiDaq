@@ -1,5 +1,5 @@
-include("HashpipeCalculations.jl")
-using .HashpipeCalculations, Blio, Plots, FFTW, Statistics
+include("HashpipeUtils.jl")
+using .HashpipeUtils, Blio, Plots, FFTW, Statistics
 
 np, nt, nc = (2, 524288, 64) #(polarizations, time samples, coarse channels)
 filename = "/datag/davidm/voyager/blc23_guppi_59046_80036_DIAG_VOYAGER-1_0011.0000.raw"
@@ -20,16 +20,16 @@ seekstart(file) #rewind to the start of the file
 while read!(file, header) #read header
     println(i)
     read!(file, data) #read data
-    pwr = HashpipeCalculations.hashpipe_fft(data, nf, chan) #FFT of data w/ nf channels on 7th coarse channel
-    HashpipeCalculations.remove_DCspike(pwr) #remove spike
+    pwr = HashpipeUtils.hashpipe_fft(data, nf, chan) #FFT of data w/ nf channels on 7th coarse channel
+    HashpipeUtils.remove_DCspike(pwr) #remove spike
     integrated[i, :, :] = pwr #add to integrated array
     i+=1
 end
 
 # plotting
 function snapshot_fft(chan)
-    fine_pwr = HashpipeCalculations.hashpipe_fft(data, 65536, chan)
-    HashpipeCalculations.remove_DCspike(fine_pwr)
+    fine_pwr = HashpipeUtils.hashpipe_fft(data, 65536, chan)
+    HashpipeUtils.remove_DCspike(fine_pwr)
 
     l1 = @layout [a; b]
     pol1 = fine_pwr[1,:]
