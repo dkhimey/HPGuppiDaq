@@ -1,30 +1,23 @@
 include("RedisDisplay.jl")
 using .RedisDisplay, Redis
 
-conn = RedisConnection(host="redishost")
-# srt://blc00/0/spectra
-
-function f(x)
+function processdata()
     # grab data from redis
     abspwr = hget(conn, "srt://blc00/0/spectra", "avgpwr")
     # convert abstract sring to power array
     pwrarray = reinterpret(Float32, codeunits(abspwr))
     avgpwr = reshape(pwrarray, (2,1,64))
+    return avgpwr
+end
 
+function plotpwr()
+    avgpwr = processdata()
     # display
     display(RedisDisplay.snapshot_power(avgpwr))
 end
 
-# open redis subscribtion
-sub = open_subscription(conn)
-
-try
-    # subsrcribe to channel where messages are being sent
-    subscribe(sub, "chan-srt://blc00/0/spectra", f)
-catch e
-    # attempt at handling keyboard interruptions, doesnt work yet
-    if isa(e, InterruptException)
-        Redis.unsubscribe(sub, "chan-srt://blc00/0/spectra")
-        println("Connection Closed.")
-    end
-end
+function readRedis(func = plotpwr)
+    conn = RedisConnection(host="redishost")
+    # open redis subscribtion
+    sub = open_subscription(conn)
+    subscribe(sub, "chan-srt://blc00/0/spectra", func)
