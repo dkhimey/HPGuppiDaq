@@ -14,7 +14,7 @@ header = read(file, GuppiRaw.Header)
 data = Array(header)
 
 # integrated array will hold fft of all 128 blocks
-integrated = zeros(Float32, (128, 2,n))
+integrated = zeros(Float32, (128, 2,nf))
 i = 1
 seekstart(file) #rewind to the start of the file
 while read!(file, header) #read header
@@ -26,26 +26,18 @@ while read!(file, header) #read header
     i+=1
 end
 
-# plotting
-function snapshot_fft(chan)
-    fine_pwr = HashpipeUtils.hashpipe_fft(data, 65536, chan)
-    HashpipeUtils.remove_DCspike(fine_pwr)
+# # plotting
+# function snapshot()
+#     fine_pwr = sum(integrated, dims =1)[1,:,:]
+#     pol1 = fine_pwr[1,:]
+#     p1 = plot(pol1, title="Voyager", label="Pol. 1",
+#             ylims=(minimum(pol1)-std(pol1), maximum(pol1)))
+#     return display(p1)
+# end
 
-    l1 = @layout [a; b]
-    pol1 = fine_pwr[1,:]
-    pol2 = fine_pwr[2,:]
-    p1 = plot(pol1, title="Chan"*string(chan), label="Pol. 1",
-            ylims=(minimum(pol1)-std(pol1), maximum(pol1)))
-    p2 = plot(pol2, label="Pol. 2",
-            ylims=(minimum(pol2)-std(pol2), maximum(pol2)))
-    f = plot(p1, p2, layout = l1, titlefontsize=10, 
-            xlabel="Channel", ylabel="power", legend=:topleft)
-
-    return display(f)
-end
-
-# plot(integrated[:, 1, 40000:42500])
-# waterfall = integrated[:,1,:]
+# integrated = sum(integrated, dims = 1)
+# plot(integrated[1, 1, 40000:42500])
+# waterfall = integrated[1,1,:]
 # heatmap(1:size(waterfall,1), 1:size(waterfall,2), waterfall)
 # last5 = sum(integrated[124:128, 1, :], dims=1)
 # first5 = sum(integrated[1:5, 1, :], dims=1)
