@@ -6,8 +6,7 @@ using .HashpipeCalculations, .StatusBuff, Hashpipe, FFTW, CircularArrayBuffers, 
 datablocks = HashpipeCalculations.track_databuffer((0, 2, 24), (2, 512*1024, 64))
 
 # attach to status buffer
-st = Hashpipe.status_t(0,0,0,0)
-Hashpipe.status_attach(0, Ref(st))
+stsv = StatusBuff.track_statusbuff(0)
 
 # create circular array to store spectra
 # https://juliahub.com/ui/Packages/CircularArrayBuffers/HOj1r/0.1.2
@@ -16,7 +15,7 @@ spectra = CircularArrayBuffer{Array{Float32, 2}}(5)
 # loop: read status buffer, FFT of nblkin-1, add to circular array, display
 function read(circarr = spectra , nf = 2^16, chan = 7, t = .1)
     while true
-        blk = StatusBuff.getnblkin(st)
+        blk = StatusBuff.getnblkin(stsv)
         # *****improve this******
         if blk== 0
             blk = 24
