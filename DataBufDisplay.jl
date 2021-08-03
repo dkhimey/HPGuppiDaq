@@ -1,6 +1,6 @@
 module Display
 using .HashpipeUtils, Plots, Statistics
-
+# need to clean this file/ merge with Redis Display
     inst, nbuff, nblock = 0, 2, 0
     np, nt, nc = 2, 512*1024, 64
     data = HashpipeUtils.track_databuffer((inst, nbuff, nblock), (np, nt, nc))
