@@ -1,33 +1,35 @@
 include("HashpipeCalculations.jl")
 using .HashpipeCalculations, Blio, Plots, FFTW, Statistics
 
-np, nt, nc = (2, 524288, 64)
+np, nt, nc = (2, 524288, 64) #(polarizations, time samples, coarse channels)
 filename = "/datag/davidm/voyager/blc23_guppi_59046_80036_DIAG_VOYAGER-1_0011.0000.raw"
 file = open(filename)
 
 # read all blocks
-n = 2^16
-chan = 7
+nf = 2^16 #number of fine channels in each coarse channel
+chan = 7 #know that voyager signal is in 7th coarse channel
+
+# initialize header and data array
 header = read(file, GuppiRaw.Header)
 data = Array(header)
 
+# integrated array will hold fft of all 128 blocks
 integrated = zeros(Float32, (128, 2,n))
 i = 1
-
-seekstart(file)
-while read!(file, header)
+seekstart(file) #rewind to the start of the file
+while read!(file, header) #read header
     println(i)
-    read!(file, data)
-    pwr = HashpipeCalculations.hashpipe_fft(data, n, chan)
-    HashpipeCalculations.remove_DCspike(pwr)
-    integrated[i, :, :] = pwr
+    read!(file, data) #read data
+    pwr = HashpipeCalculations.hashpipe_fft(data, nf, chan) #FFT of data w/ nf channels on 7th coarse channel
+    HashpipeCalculations.remove_DCspike(pwr) #remove spike
+    integrated[i, :, :] = pwr #add to integrated array
     i+=1
 end
 
 # plotting
 function snapshot_fft(chan)
-    fine_pwr = hashpipe_fft(data, 65536, chan)
-    fine_pwr[:, Int(4096/2+1)] = (fine_pwr[:, Int(4092/2)] + fine_pwr[:, Int(4092/2+2)])/2
+    fine_pwr = HashpipeCalculations.hashpipe_fft(data, 65536, chan)
+    HashpipeCalculations.remove_DCspike(fine_pwr)
 
     l1 = @layout [a; b]
     pol1 = fine_pwr[1,:]
