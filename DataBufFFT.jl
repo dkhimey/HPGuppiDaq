@@ -1,6 +1,5 @@
 include("HashpipeCalculations.jl")
 include("StatusBuff.jl")
-include("params.jl")
 using .HashpipeCalculations, .StatusBuff, Hashpipe, FFTW, CircularArrayBuffers, Plots
 
 # databuffer properties
@@ -19,7 +18,7 @@ nblkin=String(fill(0x0, 80))
 datablocks = []
 nblock = 0
 while nblock < nblocks
-    # println(nblock)
+    println(nblock)
     pb = Hashpipe.databuf_data(pdb, nblock)
     pz = Ptr{Complex{Int8}}(pb+2560*80)
     push!(datablocks, unsafe_wrap(Array, pz, (np, nt, nc)))
