@@ -49,7 +49,7 @@ module HashpipeUtils
         transformed = fft(reshaped, 2)
         shifted = fftshift(transformed, 2) #(2, n, nt/n, nchans)
         if integrated
-            total_pwr = compute_pwr(shifted, 1, false, 3) #(2, n, 1)
+            total_pwr = compute_pwr(shifted, false, 3) #(2, n, 1)
             return reshape(total_pwr, (np,length(chan)*n))
         else
             return shifted
