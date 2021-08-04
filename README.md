@@ -1,3 +1,6 @@
+# Contents
+<!-- # Requirements -->
+
 # Usage
 
 *For more examples, please refer to the tests folder.*
@@ -6,7 +9,7 @@
 
     Contains various code to perform computations such as calculating fft of data files, calculating power. Also contains a function to attach to a data buffer and create a vector of arrays that holds data from each data block.
 
-    To begin tracking a data buffer run
+    To begin tracking a data buffer from the REPL, run
     ```julia
     HashpipeUtils.track_databuffer((inst, nbuff, nblocks), 
                                     (np, nt, nc))
@@ -65,3 +68,72 @@
     *These functions are poorly written and need some updating. Will likely be merged with the RedisDisplay.jl module.*
 - ## **RedisDisplay.jl**
     Contains one function that plots power, used in the `DataFromRedis.jl `module.
+
+
+# Example
+*For more examples, see tests folder.*
+
+## **Attaching to a data buffer and loading in data**
+
+For this example, we use the second data buffer on the first instance, which contains 24 blocks in each data buffer. Our data arrays have 2 polarizations, 524288 time samples, and 64 coarse channels.
+
+```julia
+inst, nbuff, nblocks = 0, 2, 24
+np, nt, nc = 2, 524288, 64
+# don't forget to set the hashpipe keyfile to point to the correct folder
+# Ex: ENV["HASHPIPE_KEYFILE"]="/home/user"
+```
+To connect to the data buffer, we use a function in the HashpipeUtils module:
+```julia
+blks = HashpipeUtils.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
+```
+`blks` is a vector with `nblocks` (24, in our case) elements. Underneath the hood, this function uses the `unsafe_wrap()` function to access the data in each data block. What this means, is that the blks vector will automatically update and clear as data moves through the data buffer. Let's examine blk further:
+```julia
+julia> size(blks[1])
+>> (2, 524288, 64)
+
+julia> typeof(blks[1])
+>> Array{Complex{Int8}, 3}
+```
+Each element in `blks` contains an array of size `(np, nt, nc)`, that holds complex integers (aka raw voltage data). 
+
+## **Using the Data**
+Now that we have the data loaded in, we can play around with it using some of the other functions in the modules.
+
+1. **Option 1: Simple Display**
+
+    One option is to create a simple display of the data running through the buffer. Display functions are available in `DataBuffDisplay.jl`.
+
+    Using these functions it is possible to display a single snapshot of the data:
+    ```julia
+    <!-- TO-DO -->
+    ```
+    or a continuous diplay/saved gif:
+    ```julia
+    <!-- TO-DO -->
+    ```
+    Here is the gif produced:
+
+    `<!-- TO-DO -->`
+
+2. **Option 2: Redis**
+
+    The second option, which is especially useful if mulitple compute nodes are running hashpipe, is to push the data to Redis. To do so, we can run:
+    ```julia
+    DataToRedis.pushRedis(datablocks, channel = "data", key = "avgpwr", pubchan="chan-data", t = 1)
+    # t is the amount of time that the script pauses between updates to Redis
+    ```
+    This function is now continously updating the `data` channel under the key `"avgpwr"` with the power of the raw data in `blks`. The host is automatically set to `redishost` but can be changed by adding the `host = ` argument in the function.
+    Each time an update occurs, a message is sent to the `pubchan`.
+
+    These Redis updating functions can be run on multiple nodes. To aggregate the data, a connection to Redis can be established from any node (preferably the head node).
+    To do this, use the function:
+    ```julia
+    DataFromRedis.readRedis(func, pubchan = "chan-data")
+    ```
+    This function listens to messges broadcast on the `pubchan` channel. Each time a message is received, the function runs `func()`. `func` is implemented by the user and can perform any number of calculations. An exmaple function `plotpwr()` is given in `DataFromRedis.jl`. Ideally, this function will access the data on the channel and under the key previously set by the `pushRedis()` function, perform some calculations, and either plot or store the results.
+
+2. **Option 2: FFT**
+
+    A final option -- and one that is useful for signal searching -- is to perform Fast Fourier Transform calculations on the voltage data running through the hashpipe.
+
