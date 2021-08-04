@@ -1,6 +1,6 @@
 # Usage
 
-*For more examples, please refer to the tests folder, which contains examples.*
+*For more examples, please refer to the tests folder.*
 
 - ## **HashpipeUtils.jl**
 
@@ -14,7 +14,7 @@
     where "inst" is the instance, nbuff is the number of the data buffer, nblocks is the total number of data blocks in the buffer (or the number you want read in, starting from the 0th block). The second input specifies the shape of the arrays stored in the data buffer where np is the number of polarizations, nt is the number of time steps, and nc is the number of coarse channels.
 
     To compute the FFT for a raw data file, run
-    
+
         HashpipeUtils.hashpipe_fft(raw_data, nf, chan, np, nt, nc, integrated)
 
     raw_data must be of type Array{Complex{Int8}, 3} where size(raw_data) == (np, nt, nc). nf is the number of fine channels per coarse channel (must be specified such that nt is an integer multiple of nf). chan is the coarse channel(s) for which to compute the FFT. chan can be specified as a range (ie 3:6). integrated is a boolean value, automatically set to true. If false, will return an array of shape (2, nf, nt÷nf, nchans), otherwise will sum spectra together spectra along each coarse channel and return an array of shape (np, nchans * nf).
