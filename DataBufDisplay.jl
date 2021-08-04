@@ -7,7 +7,7 @@ using .HashpipeUtils, Plots, Statistics
 
     # snapshot_xxx functions return plots
     function snapshot_power()
-        avg_pwr = HashpipeUtils.compute_pwr(data, nt)
+        avg_pwr = HashpipeUtils.compute_pwr.(data)
 
         l1 = @layout [a ; b]
         pol1 = avg_pwr[1,1,:]
@@ -29,7 +29,7 @@ using .HashpipeUtils, Plots, Statistics
     end
 
     function snapshot_misc()
-        avg_pwr = HashpipeUtils.compute_pwr(data, nt)
+        avg_pwr = HashpipeUtils.compute_pwr.(data)
         interval_pwr = HashpipeUtils.compute_intvlpwr(data, 1, 1000)
         single_pwr = HashpipeUtils.compute_singlepwr(data, 1)
 
