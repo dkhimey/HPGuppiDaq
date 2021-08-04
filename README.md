@@ -137,3 +137,20 @@ Now that we have the data loaded in, we can play around with it using some of th
 
     A final option -- and one that is useful for signal searching -- is to perform Fast Fourier Transform calculations on the voltage data running through the hashpipe.
 
+    These calculations occur in real time, so it would be highly inefficient to store all the FFT data for each block each time it updates (which is approximately every 5 seconds). However, we should store at least *some* data from blocks for a short period of time since a signal is typically only visible after integrating across several data blocks. Two things are necessary to achieve this: access to the Status Buffer (which contains informationa about which block is currently being written) and a circular array (created using the `CircularArrayBuffers` package).
+
+    To do this:
+    ```julia
+    # attach to status buffer
+    st = Hashpipe.status_t(0,0,0,0)
+    # create circular array
+    spectra = CircularArrayBuffer{Array{Float32, 2}}(5)
+    ```
+
+    To calculate the FFT, store the data in the `spectra` array, and plot the integrated spectra over 5 blocks run:
+    ```julia
+    DataBuffFFT.FFTread(blks, spectra, chan = 7, st)
+    ```
+
+    This will produce a continously updating display of the signal in each polarization in the 7th coarse channel.
+
