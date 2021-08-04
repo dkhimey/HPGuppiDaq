@@ -1,8 +1,9 @@
 include("../HashpipeUtils.jl")
 include("../DataBuffFFT.jl")
 include("../StatusBuff.jl")
-using .HashpipeUtils, .DataBuffFFT, .StatusBuff
+using .HashpipeUtils, .DataBuffFFT, .StatusBuff, Hashpipe, CircularArrayBuffers
 
+# ENV["HASHPIPE_KEYFILE"]="/home/davidm"
 # attach to data buffer & get data in blocks
 blks = HashpipeUtils.track_databuffer((0, 2, 24), (2, 512*1024, 64))
 
@@ -13,4 +14,4 @@ st = Hashpipe.status_t(0,0,0,0)
 # https://juliahub.com/ui/Packages/CircularArrayBuffers/HOj1r/0.1.2
 spectra = CircularArrayBuffer{Array{Float32, 2}}(5)
 
-DataBuffFFT.FFTread(blks, spectra, 7, st)
+# DataBuffFFT.FFTread(blks, spectra, 7, st)
