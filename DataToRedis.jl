@@ -6,9 +6,10 @@ using .HashpipeUtils, Redis
 # nblocks = 24
 # blks = HashpipeUtils.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
 
-function pushRedis(datablocks, t = 1)
+function pushRedis(datablocks, channel = "srt://blc00/0/spectra", key = "avgpwr",
+                   pubchan="chan-srt://blc00/0/spectra", t = 1, host = "redishost")
     # connect to redis
-    conn = RedisConnection(host="redishost")
+    conn = RedisConnection(host=host)
     while true
         println("pushing.....")
         # compute power
@@ -16,9 +17,9 @@ function pushRedis(datablocks, t = 1)
         # convert power array to abstract string
         abspwr = unsafe_string(Ptr{UInt8}(pointer(power)), sizeof(power))
         # add abstract string to redis
-        hset(conn, "srt://blc00/0/spectra", "avgpwr", abspwr)
+        hset(conn, channel, key, abspwr)
         # publish ready message
-        publish(conn, "chan-srt://blc00/0/spectra", "data ready")
+        publish(conn, pubchan, "data ready")
     
         # wait
         sleep(t)
