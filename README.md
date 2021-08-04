@@ -8,11 +8,11 @@
     + [DataBuffDisplay](https://github.com/dkhimey/HPGuppiDaq#DataBuffDisplay.jl)
     + [RedisDisplay](https://github.com/dkhimey/HPGuppiDaq#RedisDisplay.jl)
 
-- ### [Tutorial](https://github.com/dkhimey/HPGuppiDaq#tutorial)
+- ### [Tutorial](https://github.com/dkhimey/HPGuppiDaq#tutorial-1)
     + [Attaching and loading data](https://github.com/dkhimey/HPGuppiDaq#attaching-to-a-data-buffer-and-loading-in-data)
-    + [Display]()
-    + [Redis Integration]()
-    + [FFT]()
+    + [Display](https://github.com/dkhimey/HPGuppiDaq#option-1-simple-display)
+    + [Redis Integration](https://github.com/dkhimey/HPGuppiDaq#option-2-redis)
+    + [FFT](https://github.com/dkhimey/HPGuppiDaq#option-3-fft)
 #
 # **Modules**
 
