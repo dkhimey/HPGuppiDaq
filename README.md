@@ -1,11 +1,24 @@
 # Contents
-<!-- # Requirements -->
+- ### [Modules](https://github.com/dkhimey/HPGuppiDaq#modules)
+    + [HashpipeUtils](https://github.com/dkhimey/HPGuppiDaq#hashpipeutils.jl)
+    + [StatusBuff](https://github.com/dkhimey/HPGuppiDaq#StatusBuff.jl)
+    + [DataBuffFFT](https://github.com/dkhimey/HPGuppiDaq#DataBuffFFT.jl)
+    + [DataToRedis](https://github.com/dkhimey/HPGuppiDaq#DataToRedis.jl)
+    + [DataFromRedis](https://github.com/dkhimey/HPGuppiDaq#DataFromRedis.jl)
+    + [DataBuffDisplay](https://github.com/dkhimey/HPGuppiDaq#DataBuffDisplay.jl)
+    + [RedisDisplay](https://github.com/dkhimey/HPGuppiDaq#RedisDisplay.jl)
 
-# Usage
+- ### [Tutorial](https://github.com/dkhimey/HPGuppiDaq#tutorial)
+    + [Attaching and loading data](https://github.com/dkhimey/HPGuppiDaq#attaching-to-a-data-buffer-and-loading-in-data)
+    + [Display]()
+    + [Redis Integration]()
+    + [FFT]()
+#
+# **Modules**
 
 *For more examples, please refer to the tests folder.*
 
-- ## **HashpipeUtils.jl**
+- ### **HashpipeUtils.jl**
 
     Contains various code to perform computations such as calculating fft of data files, calculating power. Also contains a function to attach to a data buffer and create a vector of arrays that holds data from each data block.
 
@@ -24,7 +37,7 @@
 
     Other functions include `compute_pwr()`, which calculates the average power for each channel in a raw data array.
 
-- ## **StatusBuff.jl**
+- ### **StatusBuff.jl**
     Will likely be merged into HashpipeUtils.jl at some point. This module contains functions that track the status buffer and access various fields within it.
 
     To retreive the value of a field in the Status Buffer, run
@@ -38,7 +51,7 @@
     ```julia
     StatusBuff.getnblkin(st)
     ```
-- ## **DataBuffFFT.jl**
+- ### **DataBuffFFT.jl**
     This module contains a single function that continuously loops through the data blocks in a data buffer, stores the result of computing the FFT on each block in a circular array, and continuously displays the integrated spectra for the blocks stored in the circular array. To run:
     ```julia
     datablocks = HashpipeCalculations.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
@@ -49,16 +62,16 @@
     ```
     *To further develop this module, it would be useful to add a functionality to the `FFTread()` function so various functions could be passed in to customize behavior.*
 
-- ## **DataToRedis.jl**
+- ### **DataToRedis.jl**
     The function in this module can be used to push data (currently power data) to a Redis channel and send a publish message:
     ```julia
     datablocks = HashpipeCalculations.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
     DataToRedis.pushRedis(datablocks, t = 1) #t indicates the sleep time.
     ```
     *In the future, it would be useful to re-write this function in a way that makes it more customizable so different computed quantities can be pushed to Redis.*
-- ## **DataFromRedis.jl**
+- ### **DataFromRedis.jl**
     The main function in this module -- `readRedis()` -- accepts a function as an input, or automatically uses the `plotpwr()` function available in the module. The `readRedis()` function subscribes to publish messages and once such a message is received, runs the function passed to it.
-- ## **DataBuffDisplay.jl**
+- ### **DataBuffDisplay.jl**
     Provides several different plotting functions that produce a real-time display of the data passing from the data buffer. Currently, not fully updated/functional. 
     This module contains three different kinds of functions:
     + `snapshot_xxx()` - these produce a single snapshot of the data buffer at the time that the function is run
@@ -66,14 +79,14 @@
     + `gif_xxx(filename, n)` - these produce `n` snapshots and save them as a gif as the specified `filename`, created using the `gif_snapshot()` function.
 
     *These functions are poorly written and need some updating. Will likely be merged with the RedisDisplay.jl module.*
-- ## **RedisDisplay.jl**
+- ### **RedisDisplay.jl**
     Contains one function that plots power, used in the `DataFromRedis.jl `module.
 
 
-# Example
+# **Tutorial**
 *For more examples, see tests folder.*
 
-## **Attaching to a data buffer and loading in data**
+### **Attaching to a data buffer and loading in data**
 
 For this example, we use the second data buffer on the first instance, which contains 24 blocks in each data buffer. Our data arrays have 2 polarizations, 524288 time samples, and 64 coarse channels.
 
@@ -97,10 +110,10 @@ julia> typeof(blks[1])
 ```
 Each element in `blks` contains an array of size `(np, nt, nc)`, that holds complex integers (aka raw voltage data). 
 
-## **Using the Data**
+### **Using the Data**
 Now that we have the data loaded in, we can play around with it using some of the other functions in the modules.
 
-1. **Option 1: Simple Display**
+1. #### **Option 1: Simple Display**
 
     One option is to create a simple display of the data running through the buffer. Display functions are available in `DataBuffDisplay.jl`.
 
@@ -116,7 +129,7 @@ Now that we have the data loaded in, we can play around with it using some of th
 
     `<!-- TO-DO -->`
 
-2. **Option 2: Redis**
+2. #### **Option 2: Redis**
 
     The second option, which is especially useful if mulitple compute nodes are running hashpipe, is to push the data to Redis. To do so, we can run:
     ```julia
@@ -133,7 +146,7 @@ Now that we have the data loaded in, we can play around with it using some of th
     ```
     This function listens to messges broadcast on the `pubchan` channel. Each time a message is received, the function runs `func()`. `func` is implemented by the user and can perform any number of calculations. An exmaple function `plotpwr()` is given in `DataFromRedis.jl`. Ideally, this function will access the data on the channel and under the key previously set by the `pushRedis()` function, perform some calculations, and either plot or store the results.
 
-2. **Option 2: FFT**
+3. #### **Option 3: FFT**
 
     A final option -- and one that is useful for signal searching -- is to perform Fast Fourier Transform calculations on the voltage data running through the hashpipe.
 
