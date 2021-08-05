@@ -162,8 +162,9 @@ Now that we have the data loaded in, we can play around with it using some of th
 
     To calculate the FFT, store the data in the `spectra` array, and plot the integrated spectra over 5 blocks run:
     ```julia
-    DataBuffFFT.FFTread(blks, spectra, chan = 7, st)
+    DataBuffFFT.FFTread(blks, spectra, chan=7, st, inst = 0,
+                 nf = 2^16, nblocks = 24,t = 1)
     ```
 
-    This will produce a continously updating display of the signal in each polarization in the 7th coarse channel.
+    This will produce a continously updating display of the signal (across 2^16 fine channels) in each polarization in the 7th coarse channel.
 
