@@ -16,9 +16,9 @@ function plotpwr()
     display(RedisDisplay.snapshot_power(avgpwr))
 end
 
-function readRedis(func = plotpwr, pubchan = "chan-srt://blc00/0/spectra", host = "redishost")
-    conn = RedisConnection(host=host)
+# subchan: "chan-srt://blc00/0/spectra"
+function readRedis(redisconnection, pubchan, func = plotpwr)
     # open redis subscribtion
-    sub = open_subscription(conn)
+    sub = open_subscription(redisconnection)
     subscribe(sub, pubchan, func)
 end
