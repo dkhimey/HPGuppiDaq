@@ -30,7 +30,7 @@ module HashpipeUtils
     end
 
     function compute_pwr(raw_data, avg=true, dim =2)
-        pwr = sum(compute_mag(raw_data), dims=dim)
+        pwr = integrate(detect(raw_data))
         if avg
             nt = size(raw_data)[dim]
             return pwr/nt
