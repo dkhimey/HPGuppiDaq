@@ -43,18 +43,17 @@ module HashpipeUtils
         return compute_mag(@view raw_data[:, idx, :])
     end
 
-    function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, nf, chan,
-                          integrated=true)
+    function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, nf, chan)
         np, nt, nc = size(raw_data)
         reshaped = @view reshape(raw_data, (np, nf, nt÷nf, nc))[:, :, :, chan]
         transformed = fft(reshaped, 2)
-        shifted = fftshift(transformed, 2) #(2, nf, nt/n, nchans)
-        if integrated
-            total_pwr = compute_pwr(shifted, false, 3) #(2, nf, 1)
-            return reshape(total_pwr, (np,length(chan)*nf))
-        else
-            return shifted
-        end
+        return fftshift(transformed, 2) #(2, nf, nt/n, nchans)
+        # if integrated
+        #     total_pwr = compute_pwr(shifted, false, 3) #(2, nf, 1)
+        #     return reshape(total_pwr, (np,length(chan)*nf))
+        # else
+        #     return shifted
+        # end
     end
 
     function remove_DCspike(pwr_array)
