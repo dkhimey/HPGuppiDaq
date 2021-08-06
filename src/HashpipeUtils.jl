@@ -29,8 +29,8 @@ module HashpipeUtils
         return reshape(sum(power, dims = 2), (shape[1], shape[3])) #how to reshape more generally (when not using dim=2)
     end
 
-    function compute_pwr(raw_data, avg=true, dim =2)
-        pwr = integrate(detect(raw_data))
+    function compute_pwr(raw_data, avg=true, dim=2)
+        pwr = integrate(detect(raw_data), dim)
         if avg
             nt = size(raw_data)[dim]
             return pwr/nt
