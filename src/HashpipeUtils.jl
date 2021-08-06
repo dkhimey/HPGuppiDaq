@@ -20,8 +20,13 @@ module HashpipeUtils
         return datablocks
     end
 
-    function compute_mag(raw_data)
-        return abs2.(Complex{Float32}.(raw_data))
+    function detect(raw_data)
+        return abs2.(convert(Array{Complex{Float32}}, raw_data))
+    end
+
+    function integrate(power, dim = 2)
+        shape = size(power)
+        return reshape(sum(power, dims = 2), (shape[1], shape[3])) #how to reshape more generally (when not using dim=2)
     end
 
     function compute_pwr(raw_data, avg=true, dim =2)
@@ -47,13 +52,7 @@ module HashpipeUtils
         np, nt, nc = size(raw_data)
         reshaped = @view reshape(raw_data, (np, nf, nt÷nf, nc))[:, :, :, chan]
         transformed = fft(reshaped, 2)
-        return fftshift(transformed, 2) #(2, nf, nt/n, nchans)
-        # if integrated
-        #     total_pwr = compute_pwr(shifted, false, 3) #(2, nf, 1)
-        #     return reshape(total_pwr, (np,length(chan)*nf))
-        # else
-        #     return shifted
-        # end
+        return fftshift(transformed, 2) #(np, nf, nt/nf, nchans)
     end
 
     function remove_DCspike(pwr_array)
