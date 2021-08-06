@@ -27,7 +27,7 @@
     HashpipeUtils.track_databuffer((inst, nbuff, nblocks), 
                                     (np, nt, nc))
     ```
-    where `inst` is the instance, `nbuff` is the number of the data buffer, `nblocks` is the total number of data blocks in the buffer (or the number you want read in, starting from the 0th block). The second input specifies the shape of the arrays stored in the data buffer where `np` is the number of polarizations, `nt` is the number of time steps, and `nc` is the number of coarse channels.
+    where `inst` is the instance, `nbuff` is the number of the data buffer, `nblocks` is the total number of data blocks in the buffer (or the number you want read in, starting from the first block). The second input specifies the shape of the arrays stored in the data buffer where `np` is the number of polarizations, `nt` is the number of time steps, and `nc` is the number of coarse channels.
 
     To compute the FFT for a raw data file, run
     ```julia
