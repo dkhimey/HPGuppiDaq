@@ -56,9 +56,20 @@ uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
 version = "3.3.9+8"
 
 [[Hashpipe]]
-git-tree-sha1 = "2aa080a17e0968d757750e351aab9f39e615ebca"
+deps = ["Hashpipe_jll"]
+git-tree-sha1 = "1fb6b16bee02252bfb828f40c0379b339c97f72b"
+repo-rev = "main"
+repo-url = "https://github.com/max-Hawkins/Hashpipe.jl.git"
 uuid = "89861ec2-aa86-43f2-b769-fb502ce05d7b"
 version = "0.1.0"
+
+[[Hashpipe_jll]]
+deps = ["Libdl", "Pkg"]
+git-tree-sha1 = "d3d58c0e7fb152bbc7945eb4701e768df6aa4a3c"
+repo-rev = "master"
+repo-url = "https://github.com/max-Hawkins/Hashpipe_jll.jl.git"
+uuid = "a3e50fc0-e135-5cb8-92f4-a3765d91b533"
+version = "0.0.1+0"
 
 [[IntelOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
