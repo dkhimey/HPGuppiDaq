@@ -21,3 +21,4 @@ function readRedis(func = plotpwr, pubchan = "chan-srt://blc00/0/spectra", host 
     # open redis subscribtion
     sub = open_subscription(conn)
     subscribe(sub, pubchan, func)
+end
