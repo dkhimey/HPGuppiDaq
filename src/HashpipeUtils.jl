@@ -58,4 +58,13 @@ module HashpipeUtils
         n = size(pwr_array)[2]
         pwr_array[:,n÷2 + 1] = ((@view pwr_array[:,n÷2]) + (@view pwr_array[:,n÷2 + 2]))/2
     end
+
+    function init_circarray(n)
+        circ = CircularArrayBuffer{Array{Float32, 2}}(n)
+        i = 0
+        while i < n
+            push!(circ, zeros(size(pwr)))
+            i += 1
+        end
+    end
 end
