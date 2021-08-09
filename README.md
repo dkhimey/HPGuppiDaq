@@ -133,7 +133,8 @@ Now that we have the data loaded in, we can play around with it using some of th
 
     The second option, which is especially useful if mulitple compute nodes are running hashpipe, is to push the data to Redis. To do so, we can run:
     ```julia
-    DataToRedis.pushRedis(datablocks, channel = "data", key = "avgpwr", pubchan="chan-data", t = 1)
+    conn = RedisConnection(host="redishost")
+    DataToRedis.pushRedis(conn, datablocks, channel = "data", key = "avgpwr", pubchan="chan-data", t = 1)
     # t is the amount of time that the script pauses between updates to Redis
     ```
     This function is now continously updating the `data` channel under the key `"avgpwr"` with the power of the raw data in `blks`. The host is automatically set to `redishost` but can be changed by adding the `host = ` argument in the function.
@@ -142,9 +143,20 @@ Now that we have the data loaded in, we can play around with it using some of th
     These Redis updating functions can be run on multiple nodes. To aggregate the data, a connection to Redis can be established from any node (preferably the head node).
     To do this, use the function:
     ```julia
-    DataFromRedis.readRedis(func, pubchan = "chan-data")
+    conn = RedisConnection(host="redishost")
+    function func()
+        # grab data from updated redis key
+        abspwr = hget(conn, "data", "avgpwr")
+        # convert abstract string to floats
+        pwr = reinterpret(Float32, codeunits(abspwr))
+        # reshape to original shape
+        pwr = reshape(pwrarray, (2,1,64))
+        # display plot using RedisDisplay module
+        display(RedisDisplay.snapshot_power(avgpwr))
+    end
+    DataFromRedis.readRedis(conn, pubchan = "chan-data", func)
     ```
-    This function listens to messges broadcast on the `pubchan` channel. Each time a message is received, the function runs `func()`. `func` is implemented by the user and can perform any number of calculations. An exmaple function `plotpwr()` is given in `DataFromRedis.jl`. Ideally, this function will access the data on the channel and under the key previously set by the `pushRedis()` function, perform some calculations, and either plot or store the results.
+    This function listens to messges broadcast on the `pubchan` channel. Each time a message is received, the function runs `func()`. `func` is implemented by the user and can perform any number of calculations. An exmaple is given above and in `DataFromRedis.jl`. Ideally, this function will access the data on the channel and under the key previously set by the `pushRedis()` function, perform some calculations, and either plot or store the results.
 
 3. #### **Option 3: FFT**
 
