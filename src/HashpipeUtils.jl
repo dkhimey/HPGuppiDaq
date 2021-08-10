@@ -1,5 +1,5 @@
 module HashpipeUtils
-    using Hashpipe, FFTW
+    using Hashpipe, FFTW, CircularArrayBuffers
 
     function track_databuffer((inst, nbuff, nblocks), 
                               (np, nt, nc))
