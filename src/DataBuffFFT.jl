@@ -6,8 +6,9 @@ module DataBuffFFT
     # loop: read status buffer, FFT of nblkin-1, update total power, perform function on total power
     function FFTread(datablocks, n, chan, func, st, inst = 0,
         nf = 2^16, nblocks = 24,t = 1)
-        totalpower = zeros((size(datablocks[1],1), nf))
-        circarr = HashpipeUtils.init_circarray(n)
+        shape = (size(datablocks[1],1), nf)
+        totalpower = zeros(shape)
+        circarr = HashpipeUtils.init_circarray(n, shape)
         while true
             blk = StatusBuff.getnblkin(st, inst)
             # *****improve this******
@@ -28,8 +29,7 @@ module DataBuffFFT
             # store new spectrum in circarr
             push!(circarr, pwr)
 
-            func(totalpwr)
-            # display(plot(sum(circarr)[1, :], title = string(blk))) #display integrated circular array
+            func(totalpower)
             sleep(t) #wait
         end
     end
