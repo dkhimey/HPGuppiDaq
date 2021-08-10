@@ -1,5 +1,5 @@
 include("HashpipeUtils.jl")
-using .HashpipeUtils, Redis
+using ..HashpipeUtils, Redis
 
 # inst, nbuff = 0, 2
 # np, nt, nc = 2, 512*1024, 64

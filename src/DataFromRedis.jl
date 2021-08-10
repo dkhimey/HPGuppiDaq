@@ -1,5 +1,5 @@
 include("RedisDisplay.jl")
-using .RedisDisplay, Redis
+using ..RedisDisplay, Redis
 
 function processdata()
     # grab data from redis
