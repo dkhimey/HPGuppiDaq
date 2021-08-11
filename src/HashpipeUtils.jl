@@ -115,30 +115,44 @@ module HashpipeUtils
     ```
     """
     function track_statusbuff(st)
-        inst = st.instance_id
-        Hashpipe.status_attach(inst, Ref(st))
+        inst = st.instance_id # get instance
+        Hashpipe.status_attach(inst, Ref(st)) # attach to status buffer
+        # create array of all fields
         st_array = unsafe_wrap(Array, st.p_buf,
                     (Hashpipe.STATUS_RECORD_SIZE, Hashpipe.STATUS_TOTAL_SIZE÷Hashpipe.STATUS_RECORD_SIZE))
-        return StringView.(eachcol(st_array))
+        return StringView.(eachcol(st_array)) #convert each column to strings
     end
 
     """
+        getStatus(st, field, type=Int)
+
+    Grabs the value stored in a field in the status buffer. 
+    
+    Input `st` should be the same Hashpipe.status_t type input to `track_statusbuff()`.
+    `stsv` is the output of `track_statusbuff()`. `field` is the (string) field that needs to be accessed.
+    `type` is the DataType of the value stored in the field, set to Int.
     """
-    function getStatus(st, field, type=Int)
-        stsv = track_statusbuff(st)
+    function getStatus(st, stsv, field, type=Int)
         Hashpipe.status_buf_lock_unlock(Ref(st)) do
             return parse(type, @view stsv[findfirst(startswith(field), stsv)][10:end])
         end
     end
 
     """
+        getnblkin(st, stsv, piperblk = 16384, nblocks = 24)
+
+    Specifically for accessing the NULBLKIN field in the status buffer, or calculating the value if the field does not exist.
+    Input `st` should be the same Hashpipe.status_t type input to `track_statusbuff()`.
+    `stsv` is the output of `track_statusbuff()`.
+
+    If "NULBLKIN" field does not exist, the `piperblk` and `nblocks` values are used to calculate the NULBLKIN.
     """
-    function getnblkin(st, piperblk = 16384, nblocks = 24)
+    function getnblkin(st, stsv, piperblk = 16384, nblocks = 24)
         # attempt to access NULBLKIN field
-        try return getStatus(st, "NULBLKIN")
+        try return getStatus(st, stsv, "NULBLKIN")
         catch
             # if NULBLKIN field does not exist, calculate using PKTIDX
-            return getStatus(st, "PKTIDX") ÷ piperblk % nblocks
+            return getStatus(st, stsv, "PKTIDX") ÷ piperblk % nblocks
         end
     end
 end
