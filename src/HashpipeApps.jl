@@ -85,23 +85,45 @@ module HashpipeApps
     end
 
     # ********DISPLAYS********
-    function display_snapshot(snapshot_func, t = .5)
+    """
+        display_snapshot(snapshot_func, data, t = 1)
+
+    Produces a continuous display using the `snapshot_func` function, which should return a plot of the `data` input.
+    `data` should directly access the data buffer blocks such that the values stored in the vector/array are changing as snapshot_func produces graphs.
+    Takes a `t` second pause between calculations.
+    """
+    function display_snapshot(snapshot_func, data, t = 1)
         i = 0
         while true
             println(i)
-            display(snapshot_func())
+            display(snapshot_func(data))
             i+=1
             sleep(t)
         end
     end
 
-    function gif_snapshot(snapshot_func, filename, n=50)
+    """
+        gif_snapshot(snapshot_func, data, filename, n=50)
+
+    Produces a gif of a continuous display using the `snapshot_func` function, which should return a plot of the `data` input.
+    `data` should directly access the data buffer blocks such that the values stored in the vector/array are changing as snapshot_func produces graphs.
+    Takes a `t` second pause between calculations.
+    """
+    function gif_snapshot(snapshot_func, data, filename, n=50)
         anim = @animate for i ∈ 1:n
-            snapshot_func()
+            snapshot_func(data)
         end
         gif(anim, filename)
     end
 
+    """
+        snapshot_power(datablocks)
+
+    Displays average in the 1st and 2nd polarizations alongside histograms of the real components of the data.
+    datablocks` is the output of the `HashpipeUtils.track_databuffer` function.
+
+    Function has sub-optimal performance, it is recommended that the input be limited to a few blocks.
+    """
     function snapshot_power(datablocks) # very slow when perfromed on multiple blocks, limit to a few -- needs improvement
         avg_pwr = HashpipeUtils.compute_pwr.(datablocks)
         integrated_pwr = sum(avg_pwr)
@@ -128,5 +150,11 @@ module HashpipeApps
         return plot(p, h, layout = l2)
     end
 
-    display_power(t = .5) = display_snapshot(snapshot_power, t)
+    """
+        display_power(data, t = 1)
+
+    Continuous display of average power and histograms for both polarizations. 
+    Example usage of the snapshot_power and display_snapshot functions to produce a desired display.
+    """
+    display_power(data, t = 1) = display_snapshot(snapshot_power, data, t)
 end
