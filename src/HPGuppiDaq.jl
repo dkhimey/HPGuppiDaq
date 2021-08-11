@@ -4,11 +4,6 @@ module HPGuppiDaq
     using Statistics
     using Redis
 
-    include("DataBufDisplay.jl")
     include("HashpipeUtils.jl")
-    include("DataBuffFFT.jl")
-    include("DataFromRedis.jl")
-    include("DataToRedis.jl")
-    include("RedisDisplay.jl")
-    include("StatusBuff.jl")
+    include("HashpipeApps.jl")
 end
