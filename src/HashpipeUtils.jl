@@ -104,26 +104,41 @@ module HashpipeUtils
     end
 
     # ********STATUS BUFFER*********
-    function track_statusbuff(st, inst=0)
+    """
+        track_statusbuff(st, inst=0)
+
+    Tracks all fields in a Status Buffer. 
+    
+    Input `st` is a Hashpipe.status_t type initialized as
+    ```
+    st = Hashpipe.status_t(inst, shmid, p_lock, p_buf)
+    ```
+    """
+    function track_statusbuff(st)
+        inst = st.instance_id
         Hashpipe.status_attach(inst, Ref(st))
         st_array = unsafe_wrap(Array, st.p_buf,
                     (Hashpipe.STATUS_RECORD_SIZE, Hashpipe.STATUS_TOTAL_SIZE÷Hashpipe.STATUS_RECORD_SIZE))
         return StringView.(eachcol(st_array))
     end
 
-    function getStatus(st, field, inst=0, type=Int)
-        stsv = track_statusbuff(st, inst)
+    """
+    """
+    function getStatus(st, field, type=Int)
+        stsv = track_statusbuff(st)
         Hashpipe.status_buf_lock_unlock(Ref(st)) do
             return parse(type, @view stsv[findfirst(startswith(field), stsv)][10:end])
         end
     end
 
-    function getnblkin(st, inst=0, piperblk = 16384, nblocks = 24)
+    """
+    """
+    function getnblkin(st, piperblk = 16384, nblocks = 24)
         # attempt to access NULBLKIN field
-        try return getStatus(st, "NULBLKIN", inst)
+        try return getStatus(st, "NULBLKIN")
         catch
             # if NULBLKIN field does not exist, calculate using PKTIDX
-            return getStatus(st, "PKTIDX", inst) ÷ piperblk % nblocks
+            return getStatus(st, "PKTIDX") ÷ piperblk % nblocks
         end
     end
 end
