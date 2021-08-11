@@ -6,7 +6,9 @@ module HashpipeUtils
                                    (np, nt, nc))
 
     Connects to and tracks all data blocks in the data buffer.
+
     inst, nbuff, nblocks: specify the instance and number of the data buffer and the number of data blocks it contains
+
     np, nt, nc: the shape of the data stored in the data blocks (polarizations, time samples, coarse channels)
     """
     function track_databuffer((inst, nbuff, nblocks), 
@@ -66,6 +68,7 @@ module HashpipeUtils
         hashpipe_fft(raw_data, nf, chan)
 
     Computes the Fast Fourier Transform for raw voltage data with nf channelizations across coarse channel specified by chan. 
+        
     chan can be specified as a single channel or a range (Ex: chan = 7, chan = 5:7, chan = :). Assumes that raw_data is shaped (np, nt, nc).
     """
     function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, nf, chan)
