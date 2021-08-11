@@ -1,5 +1,5 @@
 module HashpipeUtils
-    using Hashpipe, FFTW, CircularArrayBuffers
+    using Hashpipe, FFTW, CircularArrayBuffers, StringViews
 
     """
         track_databuffer((inst, nbuff, nblocks), 
@@ -116,7 +116,7 @@ module HashpipeUtils
     """
     function track_statusbuff(st)
         inst = st.instance_id # get instance
-        Hashpipe.status_attach(inst, Ref(st)) # attach to status buffer
+        Hashpipe.status_attach(Int64(inst), Ref(st)) # attach to status buffer
         # create array of all fields
         st_array = unsafe_wrap(Array, st.p_buf,
                     (Hashpipe.STATUS_RECORD_SIZE, Hashpipe.STATUS_TOTAL_SIZE÷Hashpipe.STATUS_RECORD_SIZE))
