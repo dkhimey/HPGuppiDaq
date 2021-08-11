@@ -7,7 +7,6 @@ module HashpipeApps
     using FFTW
     using Plots
     using Statistics
-    # ********DISPLAYS********
 
     # ********REDIS INTEGRATION********
     """
@@ -84,4 +83,50 @@ module HashpipeApps
             sleep(t) #wait
         end
     end
+
+    # ********DISPLAYS********
+    function display_snapshot(snapshot_func, t = .5)
+        i = 0
+        while true
+            println(i)
+            display(snapshot_func())
+            i+=1
+            sleep(t)
+        end
+    end
+
+    function gif_snapshot(snapshot_func, filename, n=50)
+        anim = @animate for i ∈ 1:n
+            snapshot_func()
+        end
+        gif(anim, filename)
+    end
+
+    function snapshot_power(datablocks) # very slow when perfromed on multiple blocks, limit to a few -- needs improvement
+        avg_pwr = HashpipeUtils.compute_pwr.(datablocks)
+        integrated_pwr = sum(avg_pwr)
+
+        l1 = @layout [a ; b]
+        pol1 = integrated_pwr[1,1,:]
+        pol2 = integrated_pwr[2,1,:]
+
+        p1 = plot(pol1, title="Pol. 1, Total Power", ylims=(minimum(pol1)-std(pol1), maximum(pol1)))
+        p2 = plot(pol2, title="Pol. 2, Total Power", ylims=(minimum(pol2)-std(pol2), maximum(pol2)))
+
+        p = plot(p1, p2, layout = l1, legend = false, titlefontsize=10, 
+                xlabel="Coarse Channel", ylabel="Average Power")
+
+
+        reals = real.(datablocks)
+        integrated_reals = sum(reals)
+        l1 = @layout [a ; b]
+        h1 = histogram(integrated_reals[1,:,1])
+        h2 = histogram(integrated_reals[2,:,1])
+        h = plot(h1, h2, layout = l1, legend = false, xlabel="Re(voltage)")
+
+        l2 = @layout [a{0.7w} b]
+        return plot(p, h, layout = l2)
+    end
+
+    display_power(t = .5) = display_snapshot(snapshot_power, t)
 end
