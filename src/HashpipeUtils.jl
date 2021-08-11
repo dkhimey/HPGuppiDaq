@@ -68,7 +68,7 @@ module HashpipeUtils
         hashpipe_fft(raw_data, nf, chan)
 
     Computes the Fast Fourier Transform for raw voltage data with nf channelizations across coarse channel specified by chan. 
-        
+
     chan can be specified as a single channel or a range (Ex: chan = 7, chan = 5:7, chan = :). Assumes that raw_data is shaped (np, nt, nc).
     """
     function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, nf, chan)
@@ -101,5 +101,29 @@ module HashpipeUtils
             i += 1
         end
         return circ
+    end
+
+    # ********STATUS BUFFER*********
+    function track_statusbuff(st, inst=0)
+        Hashpipe.status_attach(inst, Ref(st))
+        st_array = unsafe_wrap(Array, st.p_buf,
+                    (Hashpipe.STATUS_RECORD_SIZE, Hashpipe.STATUS_TOTAL_SIZE÷Hashpipe.STATUS_RECORD_SIZE))
+        return StringView.(eachcol(st_array))
+    end
+
+    function getStatus(st, field, inst=0, type=Int)
+        stsv = track_statusbuff(st, inst)
+        Hashpipe.status_buf_lock_unlock(Ref(st)) do
+            return parse(type, @view stsv[findfirst(startswith(field), stsv)][10:end])
+        end
+    end
+
+    function getnblkin(st, inst=0, piperblk = 16384, nblocks = 24)
+        # attempt to access NULBLKIN field
+        try return getStatus(st, "NULBLKIN", inst)
+        catch
+            # if NULBLKIN field does not exist, calculate using PKTIDX
+            return getStatus(st, "PKTIDX", inst) ÷ piperblk % nblocks
+        end
     end
 end
