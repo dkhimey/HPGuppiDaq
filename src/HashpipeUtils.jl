@@ -1,6 +1,14 @@
 module HashpipeUtils
     using Hashpipe, FFTW, CircularArrayBuffers
 
+    """
+        track_databuffer((inst, nbuff, nblocks), 
+                                   (np, nt, nc))
+
+    Connects to and tracks all data blocks in the data buffer.
+    inst, nbuff, nblocks: specify the instance and number of the data buffer and the number of data blocks it contains
+    np, nt, nc: the shape of the data stored in the data blocks (polarizations, time samples, coarse channels)
+    """
     function track_databuffer((inst, nbuff, nblocks), 
                               (np, nt, nc))
         # attach to data buffer
@@ -20,14 +28,30 @@ module HashpipeUtils
         return datablocks
     end
 
+    """
+        detect(raw_data)
+
+    Computes the square of the absolute value of the complex voltage data in raw_data
+    """
     function detect(raw_data)
         return abs2.(convert(Array{Complex{Float32}}, raw_data))
     end
 
-    function integrate(power, dim = 2)
-        return sum(power, dims = dim) #reshape?
+    """
+        integrate(arr, dim = 2)
+
+    Integrates an array along a given dimension, automatically set to 2 if unspecified.
+    """
+    function integrate(arr, dim = 2)
+        return sum(arr, dims = dim) #reshape?
     end
 
+    """
+        compute_pwr(raw_data, avg=true, dim=2)
+
+    Computes power by calculating the magnitudes of the voltages stored in raw_data and integrates across the time dimension (set to 2).
+    Power is averaged when avg=true.
+    """
     function compute_pwr(raw_data, avg=true, dim=2)
         pwr = integrate(detect(raw_data), dim)
         if avg
@@ -38,15 +62,12 @@ module HashpipeUtils
         end
     end
 
-    # function compute_intvlpwr(raw_data, t1, t2, avg = true, dim = 2)
-    #     nt = t2-t1
-    #     compute_pwr(raw_data[:, (t1:t2), :], nt, avg, dim)
-    # end
+    """
+        hashpipe_fft(raw_data, nf, chan)
 
-    function compute_singlepwr(raw_data, idx)
-        return compute_mag(@view raw_data[:, idx, :])
-    end
-
+    Computes the Fast Fourier Transform for raw voltage data with nf channelizations across coarse channel specified by chan. 
+    chan can be specified as a single channel or a range (Ex: chan = 7, chan = 5:7, chan = :). Assumes that raw_data is shaped (np, nt, nc).
+    """
     function hashpipe_fft(raw_data::Array{Complex{Int8}, 3}, nf, chan)
         np, nt, nc = size(raw_data)
         reshaped = @view reshape(raw_data, (np, nf, nt÷nf, nc))[:, :, :, chan]
@@ -54,11 +75,21 @@ module HashpipeUtils
         return fftshift(transformed, 2) #(np, nf, nt/nf, nchans)
     end
 
+    """
+        remove_DCspike(pwr_array)
+
+    Removes the DC spike at the center of the second dimension of pwr_array which should be shaped as (number of polarizations, number of fine channels).
+    """
     function remove_DCspike(pwr_array)
         n = size(pwr_array)[2]
         pwr_array[:,n÷2 + 1] = ((@view pwr_array[:,n÷2]) + (@view pwr_array[:,n÷2 + 2]))/2
     end
 
+    """
+        init_circarray(n, shape)
+
+    Initializes a circular array with zeros, used for FFTread function to compute a rolling total power.
+    """
     function init_circarray(n, shape)
         circ = CircularArrayBuffer{Array{Float32, 2}}(n)
         i = 0
