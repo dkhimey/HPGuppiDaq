@@ -2,9 +2,20 @@
 *HPGuppiDaq relies on the Hashpipe and Hashpipe_jll packages, which contain bugs that do not allow you to simply `]add HPGuppiDaq`*
 
 To install this package:
-1. `git clone https://github.com/dkhimey/HPGuppiDaq.git`
-2. `julia --project=HPGuppiDaq`
-3. `]instantiate`
+1. clone the repository
+```
+git clone https://github.com/dkhimey/HPGuppiDaq.git
+```
+
+2. activate the HPGuppiDaq Julia environment
+```
+julia --project=HPGuppiDaq
+```
+
+3. Install dependencies
+```
+]instantiate
+```
 
 It will now be possible to import HPGuppiDaq by `using HPGuppiDaq`.
 
