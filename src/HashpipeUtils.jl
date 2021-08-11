@@ -8,7 +8,7 @@ module HashpipeUtils
     Connects to and tracks all data blocks in the data buffer.
 
     inst, nbuff, nblocks: specify the instance and number of the data buffer and the number of data blocks it contains
-
+    
     np, nt, nc: the shape of the data stored in the data blocks (polarizations, time samples, coarse channels)
     """
     function track_databuffer((inst, nbuff, nblocks), 
