@@ -6,21 +6,27 @@ module HashpipeApps
     using Redis
     using FFTW
     using Plots
+    using Statistics
     # ********DISPLAYS********
 
     # ********REDIS INTEGRATION********
     """
+    pushRedis(redisconnection, datablocks, channel, key,
+                       pubchan, t = 1)
+    
+    Connects to Redis via the specified `redisconnection`, stores `data` under the specified Redis `channel` and `key`, 
+    publishes a message to `pubchan` that data has been updated, and waits for `t` seconds.
     """
-    function pushRedis(redisconnection, datablocks, channel, key,
-        pubchan, t = 1)
+    function pushRedis(redisconnection, data, channel, key,
+                       pubchan, t = 1)
         while true
             println("pushing.....")
             # compute power
-            power = HashpipeUtils.compute_pwr.(datablocks) #this takes forever
+            # power = HashpipeUtils.compute_pwr.(datablocks) #this takes forever
             # convert power array to abstract string
-            abspwr = unsafe_string(Ptr{UInt8}(pointer(power)), sizeof(power))
+            absdata = unsafe_string(Ptr{UInt8}(pointer(data)), sizeof(data))
             # add abstract string to redis
-            hset(conn, channel, key, abspwr)
+            hset(conn, channel, key, absdata)
             # publish ready message
             publish(redisconnection, pubchan, "data ready")
 
@@ -30,6 +36,10 @@ module HashpipeApps
     end
 
     """
+        readRedis(redisconnection, pubchan, func)
+
+    Connects to Redis via the specified `redisconnection` (typically from the head node), subcribes to messages sent
+    on `pubchan`. Each time a message is received, executes the function specified by `func`.
     """
     function readRedis(redisconnection, pubchan, func)
         # open redis subscribtion
@@ -40,6 +50,10 @@ module HashpipeApps
 
     # ********REAL TIME FFT********
     """
+        FFTread(datablocks, n, chan, func, st, inst = 0,
+                nf = 2^16, nblocks = 24,t = 1)
+    
+    Performs Fast Fourier Transforms as data runs through the data buffer.
     """
     function FFTread(datablocks, n, chan, func, st, inst = 0,
                      nf = 2^16, nblocks = 24,t = 1)
