@@ -7,7 +7,7 @@ module HashpipeUtils
 
     Connects to and tracks all data blocks in the data buffer.
 
-    inst, nbuff, nblocks: specify the instance and number of the data buffer and the number of data blocks it contains
+    inst, nbuff, nblocks: specify the instance id, data buffer number, and the total number of data blocks
     
     np, nt, nc: the shape of the data stored in the data blocks (polarizations, time samples, coarse channels)
     """
