@@ -1,7 +1,5 @@
 module HashpipeApps
-    include("HashpipeUtils.jl")
-
-    using .HashpipeUtils
+    using ..HashpipeUtils
     using Hashpipe
     using Redis
     using FFTW
