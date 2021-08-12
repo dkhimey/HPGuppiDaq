@@ -83,9 +83,9 @@ module HashpipeUtils
 
     Removes the DC spike at the center of the second dimension of pwr_array which should be shaped as (number of polarizations, number of fine channels).
     """
-    function remove_DCspike(pwr_array)
+    function remove_DCspike(pwr_array, dim=2)
         n = size(pwr_array)[2]
-        pwr_array[:,n÷2 + 1] = ((@view pwr_array[:,n÷2]) + (@view pwr_array[:,n÷2 + 2]))/2
+        pwr_array[:,n÷2 + 1, :, :] = ((@view pwr_array[:,n÷2, :, :]) + (@view pwr_array[:,n÷2 + 2, :, :]))/2
     end
 
     """
