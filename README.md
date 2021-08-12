@@ -148,6 +148,8 @@ Now that we have the data loaded in, we can play around with it using some of th
     gif_snapshot(snapshot_pwr, blks[1:3], "out.gif")
     ```
     Here is the gif produced:
+
+    
     ![til](./tests/out.gif)
 
     The glitches occur when a block is read out while it is being written and should be ignored.
