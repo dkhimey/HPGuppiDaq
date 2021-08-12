@@ -52,13 +52,14 @@ module HashpipeApps
     
     Performs Fast Fourier Transforms as data runs through the data buffer.
     """
-    function FFTread(datablocks, n, chan, func, st, inst = 0,
+    function FFTread(datablocks, n, chan, func, st,
                      nf = 2^16, nblocks = 24,t = 1)
         shape = (size(datablocks[1],1), nf)
         totalpower = zeros(shape)
         circarr = HashpipeUtils.init_circarray(n, shape)
         while true
-            blk = HashpipeUtils.getnblkin(st, inst)
+            status = track_statusbuff(st)
+            blk = HashpipeUtils.getnblkin(st, status)
             # *****improve this******
             if blk== 0
             blk = nblocks
