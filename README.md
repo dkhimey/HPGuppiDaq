@@ -23,12 +23,7 @@ It will now be possible to import HPGuppiDaq by `using HPGuppiDaq`.
 # Contents
 - ### [Modules](https://github.com/dkhimey/HPGuppiDaq#modules)
     + [HashpipeUtils](https://github.com/dkhimey/HPGuppiDaq#hashpipeutilsjl)
-    + [StatusBuff](https://github.com/dkhimey/HPGuppiDaq#statusbuffjl)
-    + [DataBuffFFT](https://github.com/dkhimey/HPGuppiDaq#databufffftjl)
-    + [DataToRedis](https://github.com/dkhimey/HPGuppiDaq#datatoredisjl)
-    + [DataFromRedis](https://github.com/dkhimey/HPGuppiDaq#datafromredisjl)
-    + [DataBuffDisplay](https://github.com/dkhimey/HPGuppiDaq#databuffdisplayjl)
-    + [RedisDisplay](https://github.com/dkhimey/HPGuppiDaq#redisdisplayjl)
+    + [HashpipeApps](https://github.com/dkhimey/HPGuppiDaq#hashpipeutilsjl)
 
 - ### [Tutorial](https://github.com/dkhimey/HPGuppiDaq#tutorial-1)
     + [Attaching and loading data](https://github.com/dkhimey/HPGuppiDaq#attaching-to-a-data-buffer-and-loading-in-data)
@@ -38,7 +33,7 @@ It will now be possible to import HPGuppiDaq by `using HPGuppiDaq`.
 #
 # **Modules**
 
-*For more examples, please refer to the tests folder.*
+*For examples, please refer to the tests folder.*
 
 - ### **HashpipeUtils.jl**
 
@@ -141,22 +136,29 @@ Now that we have the data loaded in, we can play around with it using some of th
 
     Using these functions it is possible to display a single snapshot of the data:
     ```julia
-    <!-- TO-DO -->
+    snapshot_pwr(blks[1:3])
+    # it is recommended that snapshots are limited to a few blocks for faster performance
     ```
     or a continuous diplay/saved gif:
     ```julia
-    <!-- TO-DO -->
+    # continuous display:
+    display_snapshot(snapshot_pwr, blks[1:3])
+
+    # gif:
+    gif_snapshot(snapshot_pwr, blks[1:3], "out.gif")
     ```
     Here is the gif produced:
+    ![til](./out.gif)
 
-    `<!-- TO-DO -->`
+    The glitches occur when a block is read out while it is being written and should be ignored.
+    
 
 2. #### **Option 2: Redis**
 
     The second option, which is especially useful if mulitple compute nodes are running hashpipe, is to push the data to Redis. To do so, we can run:
     ```julia
     conn = RedisConnection(host="redishost")
-    DataToRedis.pushRedis(conn, datablocks, channel = "data", key = "avgpwr", pubchan="chan-data", t = 1)
+    DataToRedis.pushRedis(conn, blks, channel = "data", key = "avgpwr", pubchan="chan-data", t = 1)
     # t is the amount of time that the script pauses between updates to Redis
     ```
     This function is now continously updating the `data` channel under the key `"avgpwr"` with the power of the raw data in `blks`. The host is automatically set to `redishost` but can be changed by adding the `host = ` argument in the function.
@@ -184,21 +186,22 @@ Now that we have the data loaded in, we can play around with it using some of th
 
     A final option -- and one that is useful for signal searching -- is to perform Fast Fourier Transform calculations on the voltage data running through the hashpipe.
 
-    These calculations occur in real time, so it would be highly inefficient to store all the FFT data for each block each time it updates (which is approximately every 5 seconds). However, we should store at least *some* data from blocks for a short period of time since a signal is typically only visible after integrating across several data blocks. Two things are necessary to achieve this: access to the Status Buffer (which contains informationa about which block is currently being written) and a circular array (created using the `CircularArrayBuffers` package).
+    These calculations occur in real time, so it would be highly inefficient to store all the FFT data for each block each time it updates (which is approximately every 5 seconds). However, we should store at least *some* data from blocks for a short period of time since a signal is typically only visible after integrating across several data blocks.
 
-    To do this:
+    For the `FFTread` function, we need access to the Status Buffer (which contains information about which block is currently being written). To do this:
     ```julia
     # attach to status buffer
     st = Hashpipe.status_t(0,0,0,0)
-    # create circular array
-    spectra = CircularArrayBuffer{Array{Float32, 2}}(5)
     ```
 
-    To calculate the FFT, store the data in the `spectra` array, and plot the integrated spectra over 5 blocks run:
+    `FFTread` stores the data for several data blocks at a time as it iterates through the data blocks and performs some function on the integrated spectra during each iteration. This behavior is specified by the `func` parameter in the function. To calculate the FFT and plot the integrated spectra over 5 blocks run:
     ```julia
-    DataBuffFFT.FFTread(blks, spectra, chan=7, st, inst = 0,
-                 nf = 2^16, nblocks = 24,t = 1)
+    function plot_fft(pwr)
+        plot(pwr[1,:], label="1st Polarization")
+        plot(pwr[2,:], label="2nd Polarization")
+    end
+    DataBuffFFT.FFTread(blks, n = 5, chan = 46, func = plot_fft, st, nf = 2^16, t = 1)
     ```
 
-    This will produce a continously updating display of the signal (across 2^16 fine channels) in each polarization in the 7th coarse channel.
+    This will produce a continously updating display of the signal (across 2^16 fine channels) in each polarization in the 7th coarse channel. This function, however, can support a variety of behavior. The user can specify a number of different actions using the `func` parameter.
 
