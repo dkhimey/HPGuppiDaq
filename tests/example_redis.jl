@@ -12,5 +12,7 @@ blks = HPGuppiDaq.HashpipeUtils.track_databuffer((inst, nbuff, nblocks), (np, nt
 # attach to status buffer
 shmid, p_lock, p_buf = 0,0,0
 st = Hashpipe.status_t(inst, shmid, p_lock, p_buf)
+
 # grab fields in status buffer
 status = HPGuppiDaq.HashpipeUtils.track_statusbuff(st)
+
