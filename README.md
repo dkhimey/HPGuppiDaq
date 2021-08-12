@@ -148,7 +148,7 @@ Now that we have the data loaded in, we can play around with it using some of th
     gif_snapshot(snapshot_pwr, blks[1:3], "out.gif")
     ```
     Here is the gif produced:
-    ![til](./out.gif)
+    ![til](./tests/out.gif)
 
     The glitches occur when a block is read out while it is being written and should be ignored.
     
@@ -203,5 +203,5 @@ Now that we have the data loaded in, we can play around with it using some of th
     DataBuffFFT.FFTread(blks, n = 5, chan = 46, func = plot_fft, st, nf = 2^16, t = 1)
     ```
 
-    This will produce a continously updating display of the signal (across 2^16 fine channels) in each polarization in the 7th coarse channel. This function, however, can support a variety of behavior. The user can specify a number of different actions using the `func` parameter.
+    This will produce a continously updating display of the signal (across 2^16 fine channels) in each polarization in the 7th coarse channel. This function, however, can support a variety of behavior. The user can specify a number of different actions using the `func`.
 
