@@ -105,7 +105,7 @@ module HashpipeApps
 
     Produces a gif of a continuous display using the `snapshot_func` function, which should return a plot of the `data` input.
     `data` should directly access the data buffer blocks such that the values stored in the vector/array are changing as snapshot_func produces graphs.
-    Takes a `t` second pause between calculations.
+    Combines `n` snapshots.
     """
     function gif_snapshot(snapshot_func, data, filename, n=50)
         anim = @animate for i ∈ 1:n
