@@ -34,41 +34,58 @@ It will now be possible to import HPGuppiDaq by `using HPGuppiDaq`.
 # **Modules**
 
 *For examples, please refer to the tests folder.*
+## **HashpipeApps.jl**
+    Contains functions that interact with data buffer data to create displays, real time FFT functions, and provide Redis integration.
 
-- ### **HashpipeUtils.jl**
+- ## **HashpipeUtils.jl**
 
-    Contains various code to perform computations such as calculating fft of data files, calculating power. Also contains a function to attach to a data buffer and create a vector of arrays that holds data from each data block.
+    Contains various code to attach to data buffers and perform simple computations such as calculating power, removing DC spikes, or calculating FFT's. Also contains a function to create a vector of arrays that holds data from each data block in the buffer.
 
     To begin tracking a data buffer from the REPL, run
     ```julia
-    HashpipeUtils.track_databuffer((inst, nbuff, nblocks), 
+    datablocks = HashpipeUtils.track_databuffer((inst, nbuff, nblocks), 
                                     (np, nt, nc))
     ```
     where `inst` is the instance, `nbuff` is the number of the data buffer, `nblocks` is the total number of data blocks in the buffer (or the number you want read in, starting from the first block). The second input specifies the shape of the arrays stored in the data buffer where `np` is the number of polarizations, `nt` is the number of time steps, and `nc` is the number of coarse channels.
 
     To compute the FFT for a raw data file, run
     ```julia
-    HashpipeUtils.hashpipe_fft(raw_data, nf, chan, np, nt, nc, integrated)
+    HashpipeUtils.hashpipe_fft(raw_data, nf, chan)
     ```
     `raw_data` must be of type `Array{Complex{Int8}, 3}` where `size(raw_data) == (np, nt, nc)`. `nf` is the number of fine channels per coarse channel (must be specified such that `nt` is an integer multiple of `nf`). `chan` is the coarse channel(s) for which to compute the FFT. `chan` can be specified as a range (ie `chan = 3:6`). `integrated` is a boolean value, automatically set to `true`. If set to `false`, will return an array of shape `(2, nf, nt÷nf, nchans)`, otherwise will sum spectra together along each coarse channel and return an array of shape `(np, nchans * nf)`.
 
-    Other functions include `compute_pwr()`, which calculates the average power for each channel in a raw data array.
+    <!-- Other functions include `compute_pwr()`, which calculates the average power for each channel in a raw data array. -->
 
-- ### **StatusBuff.jl**
-    Will likely be merged into HashpipeUtils.jl at some point. This module contains functions that track the status buffer and access various fields within it.
-
+- ### Status Buffer Connections
     To retreive the value of a field in the Status Buffer, run
     ```julia
     st = Hashpipe.status_t(0,0,0,0)
-    StatusBuff.getStatus(st, "FIELD", inst, Type)
+    status = HPGuppiDaq.HashpipeUtils.track_statusbuff(st)
+    StatusBuff.getStatus(st, status,"FIELD", Type)
     ```
     where `"FIELD"` is replaced with the label of a field in the status buffer and `Type` is the data type of the value stored at that field (ex: `Int`, `Float`, `String`).
 
     This module also contains a specific function for accessing the `"NULBLKIN"` field in the status buffer which can be run with
     ```julia
-    StatusBuff.getnblkin(st)
+    HashpipeUtils.getnblkin(st)
     ```
-- ### **DataBuffFFT.jl**
+
+## HashpipeApps.jl
+
+- ### continuous FFT's
+    This module contains a single function that continuously loops through the data blocks in a data buffer, stores the result of computing the FFT on each block in a circular array, and continuously displays the integrated spectra for the blocks stored in the circular array. To run:
+    ```julia
+    datablocks = HashpipeCalculations.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
+    st = Hashpipe.status_t(0,0,0,0)
+    DataBuffFFT.FFTread(datablocks, 5, chan, func, st,
+                        nf = 2^16, t = 1)
+    ```
+    
+- ### Redis integration
+- ### Displays
+
+
+- ### 
     This module contains a single function that continuously loops through the data blocks in a data buffer, stores the result of computing the FFT on each block in a circular array, and continuously displays the integrated spectra for the blocks stored in the circular array. To run:
     ```julia
     datablocks = HashpipeCalculations.track_databuffer((inst, nbuff, nblocks), (np, nt, nc))
